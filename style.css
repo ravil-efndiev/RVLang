@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+
+html {
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+}
+
+.wrapper {
+    width:100%;
+    height:100%;
+}
+
+.code_field {
+    display: flex;
+    gap: 10px;
+    font-family: monospace;
+    line-height: 21px;
+    background: #333440;
+    border-radius: 10px;
+    padding: 20px 10px;
+    width: 770px;
+    margin: 0 auto;
+    max-height: 464px;
+}
+
+.line-numbers {
+    width: 20px;
+    text-align: right;
+}
+
+.line-numbers span {
+    counter-increment: linenumber;
+}
+
+.line-numbers span::before {
+    content: counter(linenumber);
+    display: block;
+    color: #506882;
+}
+
+#code {
+    font-family: 'Roboto', sans-serif;
+    line-height: 21px;
+    font-size: 15px;
+    overflow-y:scroll;
+    padding: 1px 10px;
+    border: 0;
+    background: #2b2c37;
+    color: #FFF;
+    min-width: 500px;
+    outline: none;
+    resize: none;
+    max-height: 422px;
+    border-radius: 4px;
+}
+
+.run_btn {
+    display: block;
+    width: 150px;
+    height: 70px;
+    font-size: 18px;
+    border: 2px #2b2c37 solid;
+    border-radius: 9px;
+    background-color: #333440;
+    padding: 5px 15px;
+    margin : 0 auto;
+    margin-top: 30px;
+    text-align: center;
+    color: rgb(230, 225, 225)
+}
+
+.run_btn:active, .run_btn:focus {
+    background-color: #444550;
+    border-color: #40414b;
+    transition: all 0.5s;
+}
+
+.output {
+    width: 770px;
+    height: 50px;
+    margin: 0 auto;
+    padding: 20px 20px;
+    background-color: #333440;
+    margin-top: 20px;
+    color:rgb(230, 225, 225);
+    font-size: 16px;
+}
