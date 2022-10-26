@@ -185,13 +185,17 @@ export default class executor {
         }   
         if (node instanceof CodeAreaNode) {
             if (node.type == "func_decl") {
-                console.log(`func lol scope is ${node.scope}`)
                 this.createdFunctions[node.asociatedName] = new Function(node.lines, node.scope);
             }
             if (node.type == "if") {
                 if (this.run(node.args[0]) == true) {
                     node.lines.forEach(line => {this.run(line, node.scope)});
                 }
+            }
+            if (node.type == "while") {
+                while (this.run(node.args[0]) == true) {
+                    node.lines.forEach(line => {this.run(line, node.scope)});
+                } 
             }
         }
         if (node instanceof StatementsNode) {

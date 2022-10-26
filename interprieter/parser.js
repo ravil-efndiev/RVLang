@@ -61,7 +61,10 @@ export default class Parser {
             return this.parseStartName(name, inScope);
         }
         if (this.search(TokenTypeList.if_keyword)) {
-            return this.parseStartIf(inScope);
+            return this.parseStartIfOrWhile("if", inScope);
+        }
+        if (this.search(TokenTypeList.while_keyword)) {
+            return this.parseStartIfOrWhile("while", inScope);
         }
     }
 
@@ -110,12 +113,12 @@ export default class Parser {
         }
         return codeAreaNode;
     }
-    parseStartIf(inScope = []) {
+    parseStartIfOrWhile(type, inScope = []) {
         let expression = this.parseExpression();
         this.require(TokenTypeList.lc_bracket);
         let rightBracket = this.search(TokenTypeList.rc_bracket);
         this.namelessStatementCounter++;
-        const codeAreaNode = new CodeAreaNode("if", "1", [expression], [].concat(inScope, "nms" + String(this.namelessStatementCounter)));
+        const codeAreaNode = new CodeAreaNode(type, "1", [expression], [].concat(inScope, "nms" + String(this.namelessStatementCounter)));
         while (!rightBracket) {
             const line = this.parseLine([].concat(inScope, "nms" + String(this.namelessStatementCounter)));
             if (!(line instanceof CodeAreaNode)) 
