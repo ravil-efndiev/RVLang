@@ -63,7 +63,7 @@ myFunc();
 
 ### If statements
 
-if statement will execute block of code if expression is true.
+if statement will execute block of code if condition is true.
 Logical expression doesn't require any parentheases around it
 
 ```
@@ -71,6 +71,22 @@ if 10 > 5 {
     print("succes");    
 }
 ```
+
+### While loop
+
+while loop works almost the same as if, but it repeats your code all the time untill its 
+condition will be false
+
+```
+var i = 0;
+while i < 5 {
+    print(i);
+    i = i + 1;
+}
+```
+
+this will print 0 1 2 3 4 - as i increased
+
 ##### logical operator types
 - ==
 - !=
