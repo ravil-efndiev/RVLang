@@ -1,4 +1,4 @@
-import { BinaryOperatorNode, BooleanNode, CodeAreaNode, FunctionNode, MultipleValuesNode, NumberNode, StatementsNode, StringNode, VariableNode } from "./ast.js";
+import { BinaryOperatorNode, BooleanNode, CodeAreaNode, FunctionNode, MultipleValuesNode, NullNode, NumberNode, StatementsNode, StringNode, VariableNode } from "./ast.js";
 import { dataTypes } from "./datatypes.js";
 import { TokenTypeList } from "./tokenType.js";
 
@@ -71,11 +71,15 @@ export default class Parser {
     // parseline help methods
     parseStartVariable(datatype = dataTypes.any) {
         let variableName = this.require(TokenTypeList.usable_name);
-        let assignOperator = this.require(TokenTypeList.assign);
-
+        let assignOperator = this.search(TokenTypeList.assign);
         let leftNode = new VariableNode(variableName, datatype);
-        console.log(datatype);
-        let rightNode = this.parseExpression();
+        let rightNode;
+        if (assignOperator) {
+            rightNode = this.parseExpression();
+        }
+        else {
+            rightNode = new NullNode();
+        }
         let assignNode = new BinaryOperatorNode(assignOperator, leftNode, rightNode);
         return assignNode;
     }
@@ -166,18 +170,29 @@ export default class Parser {
         if (bool) return new BooleanNode(bool);
     }
 
-    parseMultipleValues() {
-        let first = this.parseExpression();
+    parseMultipleValues(functionDeclaration = false) {
+        let first;
+        if (!functionDeclaration)
+            first = this.parseExpression();
+        else 
+            first = new VariableNode(this.search(TokenTypeList.usable_name));
+
         let operator = this.search(TokenTypeList.coma);
         if (!operator) return first;
 
         let finalArray = [first];
         while (operator) {
-            let next = this.parseExpression();
+            let next;
+            if (!functionDeclaration)
+                next = this.parseExpression();
+            else 
+                next = new VariableNode(this.search(TokenTypeList.usable_name));
+
             finalArray.push(next);
             operator = this.search(TokenTypeList.coma);
         }
         let returns = new MultipleValuesNode(finalArray);
         return returns;
     }
+   
 }

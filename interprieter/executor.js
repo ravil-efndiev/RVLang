@@ -1,4 +1,4 @@
-import { BinaryOperatorNode, BooleanNode, CodeAreaNode, FunctionNode, MultipleValuesNode, NumberNode, StatementsNode, StringNode, VariableNode } from "./ast.js";
+import { BinaryOperatorNode, BooleanNode, CodeAreaNode, FunctionNode, MultipleValuesNode, NullNode, NumberNode, StatementsNode, StringNode, VariableNode } from "./ast.js";
 import { TokenTypeList } from "./tokenType.js";
 import { arrEquals } from "./helper.js";
 import { dataTypes } from "./datatypes.js";
@@ -18,6 +18,10 @@ class Function {
         this.code = code;
         this.scope = scope;
     }
+}
+
+class Null {
+    constructor() {}
 }
 
 export let output = {value: ""};
@@ -57,6 +61,10 @@ export default class executor {
         (this.variales[name.variable.text].scope.equals(scope))) ) {
 
             if (this.variales[name.variable.text].hard != true) {
+                if (this.variales[name.variable.text].type == dataTypes.any) {
+                    // vaiable has not been declared
+                    this.variales[name.variable.text].type = this.selectType(result);
+                }
                 this.variales[name.variable.text].value = result;
             }
             else {
@@ -74,25 +82,43 @@ export default class executor {
         }
 
         if (name.datatype != dataTypes.any) {
-            if (this.selectType(result) != name.datatype)
+            if (this.selectType(result) != name.datatype && !(result instanceof Null))
                 throw new Error(`trying to asssign ${name.datatype} variable with ${this.selectType(result)} value`)
             this.variales[name.variable.text] = new Variable(result, scope, name.datatype, true);
         }
-        else if (name.datatype == dataTypes.any)
-            this.variales[name.variable.text] = new Variable(result, scope, this.selectType(result), false);
+        else if (name.datatype == dataTypes.any) {
+            let type = result instanceof Null ? dataTypes.any : this.selectType(result);
+            this.variales[name.variable.text] = new Variable(result, scope, type, false);
+        }
     }
 
     runMathOp(node, type) {
         let finalLeft = this.run(node.leftValue);
         let finalRight = this.run(node.rightValue);
 
-        if (!(this.selectType(finalLeft) == dataTypes.int && this.selectType(finalLeft) == dataTypes.int)&&
-            !(this.selectType(finalLeft) == dataTypes.string && this.selectType(finalLeft) == dataTypes.string) && 
-            type == TokenTypeList.plus) 
+        if (type == TokenTypeList.plus) {
+            if ((node.leftValue instanceof VariableNode && node.rightValue instanceof VariableNode) && 
+                !(node.leftValue.datatype == dataTypes.int &&  node.rightValue.datatype == dataTypes.int) ||
+                !(node.leftValue.datatype == dataTypes.string &&  node.rightValue.datatype == dataTypes.string)) {
                 throw new Error("value must have only number type or only string type");
-        else if (type != TokenTypeList.plus && 
-            !(this.selectType(finalLeft) == dataTypes.int && this.selectType(finalLeft) == dataTypes.int))
+            }
+
+            if (!(this.selectType(finalLeft) == dataTypes.int && this.selectType(finalLeft) == dataTypes.int)&&
+                !(this.selectType(finalLeft) == dataTypes.string && this.selectType(finalLeft) == dataTypes.string) && 
+                type == TokenTypeList.plus)  {
+                throw new Error("value must have only number type or only string type");
+            }
+        }
+        else if (type != TokenTypeList.plus) {
+            if ((node.leftValue instanceof VariableNode && node.rightValue instanceof VariableNode) && 
+                !(node.leftValue.datatype == dataTypes.int &&  node.rightValue.datatype == dataTypes.int)) {
                 throw new Error("value must have number type");
+            }
+
+            if (!(this.selectType(finalLeft) == dataTypes.int && this.selectType(finalLeft) == dataTypes.int)) {
+                throw new Error("value must have number type");
+            }
+        }
 
         switch (type) {
             case TokenTypeList.plus:
@@ -113,7 +139,12 @@ export default class executor {
         let finalLeft = this.run(node.leftValue);
         let finalRight = this.run(node.rightValue);
 
-        if (this.selectType(finalLeft) != this.selectType(finalRight)) {
+        if ((node.leftValue instanceof VariableNode && node.rightValue instanceof VariableNode) && 
+            (node.leftValue.datatype != node.rightValue.datatype))
+            throw new Error(`illegal comparsion between ${this.selectType(finalLeft)} and ${this.selectType(finalRight)}`);
+
+        else if (!(node.leftValue instanceof VariableNode && node.rightValue instanceof VariableNode) &&
+            (this.selectType(finalLeft) != this.selectType(finalRight))) {
             throw new Error(`illegal comparsion between ${this.selectType(finalLeft)} and ${this.selectType(finalRight)}`);
         }
 
@@ -145,7 +176,7 @@ export default class executor {
             return (node.bool.text === "true");
         }
         if (node instanceof BinaryOperatorNode) {
-            if (node.operator.type == TokenTypeList.assign) {
+            if (!node.operator || node.operator.type == TokenTypeList.assign) {
                 this.runAssignOp(node, scope);
             }
             else if (node.operator.type.category == "logic") {
@@ -155,13 +186,16 @@ export default class executor {
                 return this.runMathOp(node, node.operator.type);
             }
         }
+        if (node instanceof NullNode) {
+            return new Null();
+        }
         if (node instanceof VariableNode) {
 
             if (this.variales[node.variable.text] && 
                 ((this.variales[node.variable.text].scope.length < scope.length) ||
                 (this.variales[node.variable.text].scope.equals(scope))) ) {
                
-                return this.variales[node.variable.text].value;
+                return this.variales[node.variable.text].value instanceof Null ? "Null" : this.variales[node.variable.text].value;
             }
             throw new Error(`no variable with name ${node.variable.text} found`);
         }

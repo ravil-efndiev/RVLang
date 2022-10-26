@@ -39,6 +39,13 @@ export class BooleanNode extends ExpressionNode {
     }
 }
 
+export class NullNode extends ExpressionNode {
+    constructor() {
+        super();
+        this.nullUsable = "null";
+    }
+}
+
 export class BinaryOperatorNode extends ExpressionNode {
     constructor(operator, leftValue, rightValue, extraParam = "") {
         super();
