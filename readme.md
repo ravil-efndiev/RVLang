@@ -4,6 +4,14 @@
 #
 #
 
+## Instalization
+To install interprieter firstly clone or download repository,
+there will be index.html file - all language is running in web but I highly recomend to 
+launch index.html from local server to prevent any issues with loading js code    
+###
+You can use any type of local server, for example I've been using http-server node js package
+but any will work fine
+
 ### Basics
 To start here is a "print" function to print text.
 To call it or any other function type function name and parameters in parentheases.
