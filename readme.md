@@ -4,7 +4,7 @@
 #
 #
 
-## Instalization
+## installation
 To install interprieter firstly clone or download repository,
 there will be index.html file - all language is running in web but I highly recomend to 
 launch index.html from local server to prevent any issues with loading js code    
