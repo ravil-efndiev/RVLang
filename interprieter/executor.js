@@ -33,12 +33,12 @@ export default class executor {
         this.systemFunctions = {
             print(parameters) {
                 if (!Array.isArray(parameters)) {
-                    output.value = output.value.concat(String(parameters) + "\n");
+                    output.value = output.value.concat(String(parameters) + "<br>");
                     return;
                 }
 
                 parameters.forEach(parameter => {
-                    output.value = output.value.concat(String(parameter) + "\n")
+                    output.value = output.value.concat(String(parameter))
                 });
             }
         };
@@ -53,7 +53,7 @@ export default class executor {
     }
 
     runAssignOp(node, scope = []) {
-        let result = this.run(node.rightValue);
+        let result = this.run(node.rightValue, scope);
         let name = node.leftValue;
 
         if (node.extraParam == "redeclare" && this.variales[name.variable.text] && 
@@ -92,16 +92,11 @@ export default class executor {
         }
     }
 
-    runMathOp(node, type) {
-        let finalLeft = this.run(node.leftValue);
-        let finalRight = this.run(node.rightValue);
+    runMathOp(node, type, scope) {
+        let finalLeft = this.run(node.leftValue, scope);
+        let finalRight = this.run(node.rightValue, scope);
 
         if (type == TokenTypeList.plus) {
-            if ((node.leftValue instanceof VariableNode && node.rightValue instanceof VariableNode) && 
-                !(node.leftValue.datatype == dataTypes.int &&  node.rightValue.datatype == dataTypes.int) ||
-                !(node.leftValue.datatype == dataTypes.string &&  node.rightValue.datatype == dataTypes.string)) {
-                throw new Error("value must have only number type or only string type");
-            }
 
             if (!(this.selectType(finalLeft) == dataTypes.int && this.selectType(finalLeft) == dataTypes.int)&&
                 !(this.selectType(finalLeft) == dataTypes.string && this.selectType(finalLeft) == dataTypes.string) && 
@@ -110,10 +105,7 @@ export default class executor {
             }
         }
         else if (type != TokenTypeList.plus) {
-            if ((node.leftValue instanceof VariableNode && node.rightValue instanceof VariableNode) && 
-                !(node.leftValue.datatype == dataTypes.int &&  node.rightValue.datatype == dataTypes.int)) {
-                throw new Error("value must have number type");
-            }
+
 
             if (!(this.selectType(finalLeft) == dataTypes.int && this.selectType(finalLeft) == dataTypes.int)) {
                 throw new Error("value must have number type");
@@ -135,15 +127,11 @@ export default class executor {
         }
     }
 
-    runLogicOp(node, type) {
-        let finalLeft = this.run(node.leftValue);
-        let finalRight = this.run(node.rightValue);
+    runLogicOp(node, type, scope) {
+        let finalLeft = this.run(node.leftValue, scope);
+        let finalRight = this.run(node.rightValue, scope);
 
-        if ((node.leftValue instanceof VariableNode && node.rightValue instanceof VariableNode) && 
-            (node.leftValue.datatype != node.rightValue.datatype))
-            throw new Error(`illegal comparsion between ${this.selectType(finalLeft)} and ${this.selectType(finalRight)}`);
-
-        else if (!(node.leftValue instanceof VariableNode && node.rightValue instanceof VariableNode) &&
+        if (
             (this.selectType(finalLeft) != this.selectType(finalRight))) {
             throw new Error(`illegal comparsion between ${this.selectType(finalLeft)} and ${this.selectType(finalRight)}`);
         }
@@ -180,10 +168,10 @@ export default class executor {
                 this.runAssignOp(node, scope);
             }
             else if (node.operator.type.category == "logic") {
-                return this.runLogicOp(node, node.operator.type);
+                return this.runLogicOp(node, node.operator.type, scope);
             }
             else if (node.operator.type.category == "math") {
-                return this.runMathOp(node, node.operator.type);
+                return this.runMathOp(node, node.operator.type, scope);
             }
         }
         if (node instanceof NullNode) {
@@ -222,12 +210,12 @@ export default class executor {
                 this.createdFunctions[node.asociatedName] = new Function(node.lines, node.scope);
             }
             if (node.type == "if") {
-                if (this.run(node.args[0]) == true) {
+                if (this.run(node.args[0], scope) == true) {
                     node.lines.forEach(line => {this.run(line, node.scope)});
                 }
             }
             if (node.type == "while") {
-                while (this.run(node.args[0]) == true) {
+                while (this.run(node.args[0], scope) == true) {
                     node.lines.forEach(line => {this.run(line, node.scope)});
                 } 
             }
