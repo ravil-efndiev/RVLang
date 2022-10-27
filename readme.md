@@ -5,12 +5,9 @@
 #
 
 ## installation
-To install interprieter firstly clone or download repository,
-there will be index.html file - all language is running in web but I highly recomend to 
-launch index.html from local server to prevent any issues with loading js code    
-###
-You can use any type of local server, for example I've been using http-server node js package
-but any will work fine
+##### RVLang requires no istallation just follow link to github pages site since interprieter is in web 
+https://ravil-efndiev.github.io/RVLang/
+
 
 ### Basics
 To start here is a "print" function to print text.
